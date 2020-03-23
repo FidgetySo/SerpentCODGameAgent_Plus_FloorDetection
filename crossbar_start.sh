@@ -1,0 +1,1 @@
+cd "C:\Users\Fidgety\Desktop\SerpentAI" && conda activate COD && winpty crossbar start
