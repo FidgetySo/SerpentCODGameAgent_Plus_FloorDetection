@@ -98,9 +98,24 @@ def set_pos(x, y):
     ii_.mi = pynput._util.win32.MOUSEINPUT(x, y, 0, (0x0001 | 0x8000), 0, ctypes.cast(ctypes.pointer(extra), ctypes.c_void_p))
     command=pynput._util.win32.INPUT(ctypes.c_ulong(0), ii_)
     SendInput(1, ctypes.pointer(command), ctypes.sizeof(command))
-def set_pos_aimbot  (x, y):
-    x = 1 + int(x * 65536./Wd)
-    y = 1 + int(y * 65536./Hd)
+def set_pos_aimbot(x, y):
+    ScreenCenterX = 1920 / 2
+    ScreenCenterY = 1080 / 2
+    AimSpeed = 1.0
+    if x > ScreenCenterX:
+        target_x = -(ScreenCenterX - x)
+        target_x = target_x / AimSpeed
+    elif x < ScreenCenterX:
+        target_x = x - ScreenCenterX;
+        target_x = target_x / AimSpeed;
+    if y > ScreenCenterY:
+        target_y = -(ScreenCenterY - Y)
+        target_y = target_y / AimSpeed
+    elif y < ScreenCenterY:
+        target_y = x - ScreenCenterY;
+        target_y = target_y / AimSpeed;
+    x = 1 + int(target_x * 65536./Wd)
+    y = 1 + int(target_y * 65536./Hd)
     extra = ctypes.c_ulong(0)
     ii_ = pynput._util.win32.INPUT_union()
     ii_.mi = pynput._util.win32.MOUSEINPUT(x, y, 0, (0x0001 | 0x8000), 0, ctypes.cast(ctypes.pointer(extra), ctypes.c_void_p))
@@ -385,7 +400,7 @@ class SerpentCODGameAgent(GameAgent):
             reward = 0.0
             over = False
             if over_check:
-                reward = -20.0
+                reward = -1.0
                 self.overs += 1
                 if self.overs >= 6:
                     print("Game Over")
@@ -395,12 +410,18 @@ class SerpentCODGameAgent(GameAgent):
                     over = False
             else:
                 reward = 1.0
-                if value >= 1:
-                    reward += -1.5
-                elif value < 1:
-                    reward += 0.0
+                if value > 1:
+                    if value == 1:
+                        reward += -0.25
+                    elif (value >= 2 and value <= 4):
+                        reward += -0.60
+                    elif (value >= 5 and value < 20):
+                        reward += -0.80
+                    elif value == 0:
+                        reward += 0.0
                 if xp >= 7:
                     reward += 3.0
+                    
             print("Reward: ")
             print(reward)
             return reward, over
